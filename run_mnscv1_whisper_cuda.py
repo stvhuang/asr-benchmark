@@ -20,6 +20,7 @@ def build_pipeline(model):
         model=model,
         device=DEVICE,
         dtype=torch.float16,
+        generate_kwargs={"language": "en"},
     )
 
 
