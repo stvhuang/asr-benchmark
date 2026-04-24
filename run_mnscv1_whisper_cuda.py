@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from loguru import logger
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from transformers import pipeline
 
 from utils import log_args, write_result
@@ -15,22 +15,26 @@ DEVICE = "cuda:0"
 
 
 def build_pipeline(model):
-    return pipeline(
+    pipe = pipeline(
         "automatic-speech-recognition",
         model=model,
         device=DEVICE,
         dtype=torch.float16,
-        generate_kwargs={"language": "en"},
     )
+    pipe.tokenizer.set_prefix_tokens(language="en", task="transcribe")
+    return pipe
 
 
 def warmup(pipe, duration: int, runs: int):
     logger.info(f"Warmup: duration={duration}s, runs={runs}")
 
-    dummy = np.zeros(duration * 16_000, dtype=np.float32)
-
-    for _ in trange(runs, desc="Warmup"):
-        pipe([{"raw": dummy, "sampling_rate": 16_000}], batch_size=1)
+    dummy = {
+        "raw": np.zeros(duration * 16_000, dtype=np.float32),
+        "sampling_rate": 16_000,
+    }
+    results = pipe([dummy] * runs, batch_size=1)
+    for _ in tqdm(results, total=runs, desc="Warmup"):
+        pass
 
 
 def main():
