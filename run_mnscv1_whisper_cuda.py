@@ -32,13 +32,10 @@ def transcribe_batch(pipe, audio_inputs: list[dict]) -> list[str]:
 def warmup(pipe, duration: int, runs: int):
     logger.info(f"Warmup: duration={duration}s, runs={runs}")
 
-    dummy = {
-        "raw": np.zeros(duration * 16_000, dtype=np.float32),
-        "sampling_rate": 16_000,
-    }
+    dummy = np.zeros(duration * 16_000, dtype=np.float32)
 
     for _ in trange(runs, desc="Warmup"):
-        pipe([dummy], batch_size=1)
+        pipe([{"raw": dummy, "sampling_rate": 16_000}], batch_size=1)
 
 
 def main():
