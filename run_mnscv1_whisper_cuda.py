@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from datasets import load_dataset
 from loguru import logger
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from transformers import pipeline
 
 from utils import log_args, write_result
@@ -27,13 +27,10 @@ def build_pipeline(model):
 def warmup(pipe, duration: int, runs: int):
     logger.info(f"Warmup: duration={duration}s, runs={runs}")
 
-    dummy = {
-        "raw": np.zeros(duration * 16_000, dtype=np.float32),
-        "sampling_rate": 16_000,
-    }
-    results = pipe([dummy] * runs, batch_size=1)
-    for _ in tqdm(results, total=runs, desc="Warmup"):
-        pass
+    dummy = np.zeros(duration * 16_000, dtype=np.float32)
+
+    for _ in trange(runs, desc="Warmup"):
+        pipe([{"raw": dummy, "sampling_rate": 16_000}], batch_size=1)
 
 
 def main():
