@@ -19,7 +19,7 @@ def build_pipeline(model):
         "automatic-speech-recognition",
         model=model,
         device=DEVICE,
-        torch_dtype=torch.float16,
+        dtype=torch.float16,
     )
 
 
@@ -33,7 +33,7 @@ def warmup(pipe, duration: int, runs: int):
     logger.info(f"Warmup: duration={duration}s, runs={runs}")
 
     dummy = {
-        "array": np.zeros(duration * 16_000, dtype=np.float32),
+        "raw": np.zeros(duration * 16_000, dtype=np.float32),
         "sampling_rate": 16_000,
     }
 
@@ -78,7 +78,7 @@ def main():
 
             total_audio_dur += len(audio_array) / sampling_rate
             refs.append(sample["answer"])
-            inputs.append({"array": audio_array, "sampling_rate": sampling_rate})
+            inputs.append({"raw": audio_array, "sampling_rate": sampling_rate})
 
         t0 = perf_counter()
 
