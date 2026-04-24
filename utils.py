@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import socket
 import time
 from pathlib import Path
@@ -7,7 +8,8 @@ from pathlib import Path
 import jiwer
 from loguru import logger
 
-RESULTS_CSV = Path(__file__).parent / "results.csv"
+RESULTS_DIR = Path(__file__).parent / "results"
+RESULTS_CSV = RESULTS_DIR / "results.csv"
 CSV_COLUMNS = [
     "hostname",
     "dataset",
@@ -54,6 +56,14 @@ def write_result(
         logger.info(f"  REF: {ref}")
         logger.info(f"  HYP: {hyp}")
 
+    RESULTS_DIR.mkdir(exist_ok=True)
+
+    exp_epoch = int(time.time())
+
+    json_path = RESULTS_DIR / f"{exp_epoch}.json"
+    with open(json_path, "w") as f:
+        json.dump({"refs": refs, "hyps": hyps}, f)
+
     write_header = not RESULTS_CSV.exists()
 
     with open(RESULTS_CSV, "a", newline="") as f:
@@ -75,7 +85,7 @@ def write_result(
         logger.info(f"CER: {cer:.6f}")
         logger.info(f"MER: {mer:.6f}")
         logger.info(f"WER: {wer:.6f}")
-        logger.info(f"Experiment timestamp: {int(time.time())}")
+        logger.info(f"Experiment epoch: {exp_epoch}")
 
         writer.writerow(
             {
@@ -91,6 +101,6 @@ def write_result(
                 "cer": round(cer, 4),
                 "mer": round(mer, 4),
                 "wer": round(wer, 4),
-                "exp_epoch": int(time.time()),
+                "exp_epoch": exp_epoch,
             }
         )
