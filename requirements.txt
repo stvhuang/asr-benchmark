@@ -1,7 +1,6 @@
 datasets
 jiwer
 loguru
-mlx-whisper
 numpy
 torch
 torchcodec
