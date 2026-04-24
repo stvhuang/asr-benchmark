@@ -24,12 +24,6 @@ def build_pipeline(model):
     )
 
 
-def transcribe_batch(pipe, audio_inputs: list[dict]) -> list[str]:
-    results = pipe(audio_inputs, batch_size=len(audio_inputs))
-
-    return [r["text"].strip() for r in results]
-
-
 def warmup(pipe, duration: int, runs: int):
     logger.info(f"Warmup: duration={duration}s, runs={runs}")
 
@@ -80,11 +74,11 @@ def main():
 
         t0 = perf_counter()
 
-        for i in tqdm(
-            range(0, len(inputs), args.batch_size), desc=f"{part} (inference)"
-        ):
-            batch = inputs[i : i + args.batch_size]
-            hyps.extend(transcribe_batch(pipe, batch))
+        results = pipe(inputs, batch_size=args.batch_size)
+        hyps = [
+            r["text"].strip()
+            for r in tqdm(results, total=len(inputs), desc=f"{part} (inference)")
+        ]
 
         total_infer_dur = perf_counter() - t0
 
