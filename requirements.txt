@@ -1,0 +1,9 @@
+datasets
+jiwer
+loguru
+mlx-whisper
+numpy
+torch
+torchcodec
+tqdm
+transformers
