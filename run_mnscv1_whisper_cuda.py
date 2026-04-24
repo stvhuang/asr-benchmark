@@ -15,14 +15,13 @@ DEVICE = "cuda:0"
 
 
 def build_pipeline(model):
-    pipe = pipeline(
+    return pipeline(
         "automatic-speech-recognition",
         model=model,
         device=DEVICE,
         dtype=torch.float16,
+        generate_kwargs={"language": "en"},
     )
-    pipe.tokenizer.set_prefix_tokens(language="en", task="transcribe")
-    return pipe
 
 
 def warmup(pipe, duration: int, runs: int):
